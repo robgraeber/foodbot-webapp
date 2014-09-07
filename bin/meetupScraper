@@ -109,12 +109,13 @@ request.getAsync({url:"https://maps.googleapis.com/maps/api/geocode/json", qs:{k
     return db.meetup.findOne({unique: item.unique})
     .then(function(entry){
       insertCount++;
+      console.log("Inserted / updated entry #"+insertCount);
       if(!entry){
-        db.meetup.insert(item);
+        return db.meetup.insert(item);
       }else{
-        db.meetup.update({unique: item.unique}, item);
+        return db.meetup.update({unique: item.unique}, item);
       }
-    });
+    })
   });
   return Promise.all(eventPromises);
 })
