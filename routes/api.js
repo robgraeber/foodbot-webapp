@@ -39,7 +39,7 @@ module.exports = function(req, res){
   // if the address is in the collection, we retrieve the latitude and longitude stored 
   // otherwise we send a request to the google maps api
   var checkCoords = function(address){
-    return db.coordsTable.findOne({address: address.toLowerCase().trim()})
+    return db.coordsTable.findOne({_id: address.toLowerCase().trim()})
       .then(function(result){
         if(result){
           console.log('from database');
@@ -63,7 +63,7 @@ module.exports = function(req, res){
           var lng = body.results[0].geometry.location.lng;
           console.log("Lat:", lat, "Long:", lng, "Status: OK");
           //database insertion
-          db.coordsTable.save({address:address.toLowerCase().trim(),lat: lat,lng: lng});
+          db.coordsTable.save({_id:address.toLowerCase().trim(),lat: lat,lng: lng});
           return {lat: lat, lng: lng};
         }else {
           throw "API Error: "+body.status;
@@ -76,56 +76,36 @@ module.exports = function(req, res){
    ***********************************************************************/
   var lat;
   var lng;
-  Promise.all([checkCoords(address)]).spread(function(data){
+  Promise.all([checkCoords(address)])
+  .spread(function(data){
     // console.log('google Maps coords from then1:',data);
     db.meetup.ensureIndex({location:"2d"});
     db.funcheap.ensureIndex({location:"2d"});
     db.eventbrite.ensureIndex({location:"2d"});
-    // db.facebook.ensureIndex({location:"2d"});
 
     console.log(data.lng, data.lat);
     lat = data.lat;
     lng = data.lng;
     return Promise.all([
-      // db.facebook.find(
-      //     { $and: [
-      //       { "venue.address.city": "San Francisco" },
-      //       { ticketUrl: null },
-      //       { location : { $geoWithin : { $centerSphere : [ [ data.lng, data.lat ], radius / 3959 ] } } },
-      //       { time: { $gt: time-5*60*60*1000 } }
-      //       ]
-      //     })
-      //     .limit(1000)
-      //     .toArray(),
-
       db.meetup.find({
         // { time: { $gt: time-5*60*60*1000 } },
         // { location : { $geoWithin : { $centerSphere : [ [ data.lng, data.lat ], radius / 3959 ] } } }
          $and: [
             { location : { $geoWithin : { $centerSphere : [ [ data.lng, data.lat ], radius / 3959 ] } } },
             { time: { $gt: time-5*60*60*1000 } }
-            ]
-          })
-        .limit(1000)
-        .toArray(),
+          ]
+      })
+      .limit(1000)
+      .toArray(),
       
-      db.eventbrite.find(
-          { $and: [
+      db.eventbrite.find({ 
+        $and: [
             { location : { $geoWithin : { $centerSphere : [ [ data.lng, data.lat ], radius / 3959 ] } } },
             { time: { $gt: time-5*60*60*1000 } }
-            ]
-          })
-          .limit(1000)
-          .toArray(),
-      
-      db.funcheap.find(
-          { $and: [
-            { location : { $geoWithin : { $centerSphere : [ [ data.lng, data.lat ], radius / 3959 ] } } },
-            { time: { $gt: time-5*60*60*1000 } }
-            ]
-          })
-          .limit(1000)
-          .toArray(),
+        ]
+      })
+      .limit(1000)
+      .toArray(),  
       data
     ]);
   })
@@ -133,9 +113,9 @@ module.exports = function(req, res){
   /**********************************************************************
    * Getting the next events from the different collections
    **********************************************************************/
-  .spread(function(meetup, eventbrite, funcheap/*, facebook*/, data) {
+  .spread(function(meetup, eventbrite, data) {
     // concat the meetup, eventbrite and funcheap results
-    var allEvents = _.union(meetup, eventbrite, funcheap/*, facebook*/);
+    var allEvents = _.union(meetup, eventbrite);
     return allEvents;
   })
 

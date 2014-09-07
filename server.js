@@ -4,7 +4,6 @@
  */
 var express = require('express');
 var api = require('./routes/api');
-var test = require('./routes/test');
 var path = require('path');
 var app = module.exports = express();
 
@@ -18,7 +17,6 @@ app.use(express.static(path.join(__dirname, 'public')));
  * Routes
  */
 app.get('/api', api);
-app.get('/test', test);
 
 /**
  * Start Server
