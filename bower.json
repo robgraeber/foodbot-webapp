@@ -1,6 +1,6 @@
 {
   "name": "foodbot-server",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "homepage": "git@github.com:foodbot/foodbot-server.git",
   "authors": [
     "Rob Graeber <bgraeber@gmail.com>"

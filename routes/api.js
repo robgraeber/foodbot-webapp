@@ -78,42 +78,34 @@ module.exports = function(req, res){
   var lng;
   Promise.all([checkCoords(address)])
   .spread(function(data){
+
+    var timer = new Date().getTime();
     // console.log('google Maps coords from then1:',data);
-    db.meetup.ensureIndex({location:"2d"});
-    db.funcheap.ensureIndex({location:"2d"});
-    db.eventbrite.ensureIndex({location:"2d"});
 
     console.log(data.lng, data.lat);
     lat = data.lat;
     lng = data.lng;
+    var query = {
+      location : { $geoWithin : { $centerSphere : [ [ data.lng, data.lat ], radius / 3959 ] } },
+      time: { $gt: time-5*60*60*1000 }
+    };
     return Promise.all([
-      db.meetup.find({
-        // { time: { $gt: time-5*60*60*1000 } },
-        // { location : { $geoWithin : { $centerSphere : [ [ data.lng, data.lat ], radius / 3959 ] } } }
-         $and: [
-            { location : { $geoWithin : { $centerSphere : [ [ data.lng, data.lat ], radius / 3959 ] } } },
-            { time: { $gt: time-5*60*60*1000 } }
-          ]
-      })
+      db.meetup.find(query)
       .limit(1000)
       .toArray(),
-      
-      db.eventbrite.find({ 
-        $and: [
-            { location : { $geoWithin : { $centerSphere : [ [ data.lng, data.lat ], radius / 3959 ] } } },
-            { time: { $gt: time-5*60*60*1000 } }
-        ]
-      })
+      db.eventbrite.find(query)
       .limit(1000)
-      .toArray(),  
-      data
-    ]);
+      .toArray() 
+    ]).then(function(results){
+      console.log("Db query time:",new Date().getTime()-timer);
+      return results;
+    });
   })
   
   /**********************************************************************
    * Getting the next events from the different collections
    **********************************************************************/
-  .spread(function(meetup, eventbrite, data) {
+  .spread(function(meetup, eventbrite) {
     // concat the meetup, eventbrite and funcheap results
     var allEvents = _.union(meetup, eventbrite);
     return allEvents;
@@ -218,11 +210,11 @@ function distance(lat1, lon1, lat2, lon2) {
    dist = dist * 60 * 1.1515;
    return dist;
  }
-setInterval(function(){
-  db.runCommand({ping:1})
-  .then(function(res) {
-    if(res.ok){ 
-      // console.log("We're still up!");
-    }
-  });
-}, 3000);
+// setInterval(function(){
+//   db.runCommand({ping:1})
+//   .then(function(res) {
+//     if(res.ok){ 
+//       // console.log("We're still up!");
+//     }
+//   });
+// }, 3000);
