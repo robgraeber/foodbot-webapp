@@ -96,7 +96,7 @@ request.getAsync({url:"https://maps.googleapis.com/maps/api/geocode/json", qs:{k
         longitude: item.venue.lon,
       }
     },
-    unique: item.event_url
+    _id: item.name
   };
   if(item.venue.lat && item.venue.lon){
     obj.location = [item.venue.lon, item.venue.lat];
@@ -106,16 +106,11 @@ request.getAsync({url:"https://maps.googleapis.com/maps/api/geocode/json", qs:{k
 .then(function(results){
   console.log("Inserting "+results.length+" events into db..");
   var eventPromises = _.map(results, function(item){
-    return db.meetup.findOne({unique: item.unique})
-    .then(function(entry){
+    return db.meetup.save(item)
+    .then(function(){
       insertCount++;
       console.log("Inserted / updated entry #"+insertCount);
-      if(!entry){
-        return db.meetup.insert(item);
-      }else{
-        return db.meetup.update({unique: item.unique}, item);
-      }
-    })
+    });
   });
   return Promise.all(eventPromises);
 })

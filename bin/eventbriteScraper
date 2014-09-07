@@ -72,9 +72,9 @@ var scrapeEventPage = function(url, index){
     var startTime = new Date($("span.dtstart").text().trim().split(" to ")[0].replace(" from", "") +" PDT").getTime() ||
                     new Date($("span.dtstart").text().trim().split(" - ")[0].replace(" at", "")+" PDT").getTime() ||
                     new Date($("time").first().text().trim().split(" to ")[0].replace(" from", "")+" PDT").getTime();
-    var endTime;
+    var name = $("#event_header h1").text() || "";
     var item = {
-      name: $("#event_header h1").text(),
+      name: name,
       description: $(".panel_section").text(),
       duration: 3*60*60*1000,
       fee: null,
@@ -92,7 +92,7 @@ var scrapeEventPage = function(url, index){
           longitude: null,
         }
       },
-      unique: url
+      _id: name
     };
 
     return Promise.all([
@@ -116,18 +116,10 @@ var scrapeEventPage = function(url, index){
     }
   })
   .then(function(item){
-    return Promise.all([
-      db.eventbrite.findOne({unique: item.unique}),
-      item
-    ]);
+    return db.eventbrite.save(item)
   })
-  .spread(function(entry, item){
+  .then(function(){
     insertCount++;
-    if(!entry){
-      return db.eventbrite.insert(item);
-    }else{
-      return db.eventbrite.update({unique: item.unique}, item);
-    }
   })
   .catch(function(err){
     console.log("Err:", err);
