@@ -6,6 +6,7 @@ angular.module('app.home.managers')
   var storage = [];
 
   this.flush = function(){ 
+    mapRouteManager.flush();
     while(storage.length > 0) {
       storage.pop().setMap(null); 
     }
@@ -64,18 +65,15 @@ angular.module('app.home.managers')
         mapRouteManager.showRoute(mapManager.getHomePosition(), foodEvent.marker.getPosition());
         mapCenterManager.setCenterPosition(foodEvent.marker.getPosition());
     }.bind(this));
-    var pinHighlightImage = new google.maps.MarkerImage(
-      appConstants.highlightMarkerUri,
-      new google.maps.Size(46, 53),
-      new google.maps.Point(0,0),
-      new google.maps.Point(10, 34)
-    );
     foodEvent.highlightMarker = function(){ 
-      this.marker.setIcon(appConstants.highlightMarkerUri); 
-      this.marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
+        this.marker.setAnimation(google.maps.Animation.BOUNCE);
+        this.marker.setIcon(appConstants.highlightMarkerUri); 
+        this.marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
     };
     
     foodEvent.normalizeMarker = function(){ 
+      this.marker.highlighted = false;
+      this.marker.setAnimation(null);
       this.marker.setIcon(appConstants.normalMarkerUri);
     };
     return foodEvent;

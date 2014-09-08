@@ -19,7 +19,7 @@
         </tr>
       </thead>
       <tbody max-height-offsetted="320">
-        <tr ng-repeat="foodEvent in foodEvents | eventDistance: radius | eventTime: timeframe | orderBy: orderCriteria" ng-mouseover="foodEvent.highlightMarker();" ng-mouseout="foodEvent.normalizeMarker()">
+        <tr ng-repeat="foodEvent in foodEvents | eventDistance: radius | eventTime: timeframe | orderBy: orderCriteria" ng-mouseenter="foodEvent.highlightMarker();" ng-mouseleave="foodEvent.normalizeMarker()">
           
           <td class="first-column clickable" ng-click="foodEvent.showDescription = !foodEvent.showDescription">
             <span class="date-text"> {{ foodEvent.timeFMT | capitalize }} </span>
