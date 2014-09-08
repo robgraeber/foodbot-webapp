@@ -42,10 +42,10 @@ module.exports = function(req, res){
     return db.coordsTable.findOne({_id: address.toLowerCase().trim()})
       .then(function(result){
         if(result){
-          console.log('from database');
+          console.log('Got coords from database');
           return {lat: result.lat, lng: result.lng};
         }else{
-          console.log('not in database');
+          console.log('Coords not in database');
           return googleMapsRequest(address);
         }
       });
@@ -78,9 +78,8 @@ module.exports = function(req, res){
   var lng;
   Promise.all([checkCoords(address)])
   .spread(function(data){
-
+    console.log("Querying database for events");
     var timer = new Date().getTime();
-    // console.log('google Maps coords from then1:',data);
 
     console.log(data.lng, data.lat);
     lat = data.lat;
@@ -89,6 +88,7 @@ module.exports = function(req, res){
       location : { $geoWithin : { $centerSphere : [ [ data.lng, data.lat ], radius / 3959 ] } },
       time: { $gt: time-5*60*60*1000 }
     };
+    var explainQuery = { $query: query, $explain: 1 };
     return Promise.all([
       db.meetup.find(query)
       .limit(1000)
