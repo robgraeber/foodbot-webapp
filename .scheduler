@@ -6,10 +6,10 @@ MY_PATH=`dirname "$0"`
 DAY=$(date +%-d)
 
 if [ $(($DAY % 3)) = 1 ]; then 
-  $MY_PATH/eventbriteScraper 
+  $MY_PATH/bin/eventbriteScraper 
 fi
 if [ $(($DAY % 3)) = 2 ]; then 
-  $MY_PATH/meetupScraper 
+  $MY_PATH/bin/meetupScraper 
 fi
 
 

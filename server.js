@@ -3,7 +3,7 @@
  * Module dependencies
  */
 var express = require('express');
-var api = require('./routes/api');
+var api = require('./server/routes/api');
 var path = require('path');
 var app = module.exports = express();
 
