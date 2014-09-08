@@ -1,22 +1,22 @@
-foodbot-webapp
+Foodbot-Webapp
 ===========
 
-Rest API + client-side app server.
+API server + frontend + scraper.
 
-Dependencies: node, bower, npm, gulp, nodemon  
-(Also needs foodbot-scraper to populate the database)
+Dependencies: node, bower, npm, gulp, mongodb
 
-To run: fill out run.sh with your API keys, and type '. run.sh'
+To run: npm/bower install, export keys, "gulp build", run server.js 
 
-run.sh:
+And set a daily cron job for the .scheduler.
+
+Fill out a keys.sh file:
 ```
 #!/bin/bash
-gulp build
 
+export MEETUPAPIKEY='@@@@@@'
 export GOOGLEAPIKEY='@@@@@@'
 export MONGOURL='mongodb://@@@@@@@:27017/@@@@@'
 export PORT=8000
-nodemon server.js
 ```
 During development: type 'gulp' to compile and watch files
 
