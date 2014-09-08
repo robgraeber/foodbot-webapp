@@ -28,9 +28,7 @@ angular.module('app.home.managers')
 
   this.updateMarkers     = function(foodEvents, startAddress){
     mapMarkerManager.flush();
-    for (var i = 0; i < foodEvents.length ; i++) {
-      mapMarkerManager.addEventPin(foodEvents[i], startAddress, this.getMap(), this);
-    }
+    mapMarkerManager.addEventPins(foodEvents, startAddress, this.getMap(), this);
   };
   this.getMap           = function(){ return this.map; };
 

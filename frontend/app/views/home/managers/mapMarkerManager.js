@@ -26,8 +26,14 @@ angular.module('app.home.managers')
     this.lastInfo = marker.infoWindow;
     this.lastInfo.open(marker.getMap(), marker);
   };
-  
-  this.addEventPin = function(foodEvent, startAddress, map, mapManager){ 
+  this.addEventPins = function(eventArray, startAddress, map, mapManager){
+    var delay = 50 + eventArray.length * 700/130;
+    for(var i = 0; i<eventArray.length; i++){
+      this.addEventPin(eventArray[i], startAddress, map, mapManager, delay);
+    }
+  }
+  this.addEventPin = function(foodEvent, startAddress, map, mapManager, flickerDelay){ 
+    flickerDelay = flickerDelay || 0;
     var venue       = foodEvent.venue.address;
     var position    = new google.maps.LatLng(venue.latitude, venue.longitude);
     var marker      = new google.maps.Marker({ 
@@ -36,11 +42,12 @@ angular.module('app.home.managers')
       position: position,
       icon: appConstants.blankMarkerUri,
       map: map,
+      optimized: false
     });
-    //this fixes flicker bug on chrome
+    //fixes google map's animation flicker bug
     setTimeout(function(){
       marker.setIcon(appConstants.normalMarkerUri);
-    }, 150);
+    }, flickerDelay);
 
     var description = foodEvent.description;
     if(description.length>143){
