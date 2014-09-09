@@ -34,7 +34,7 @@
             <p class="description-text text-justify" ng-show="foodEvent.showDescription"> {{foodEvent.text}} </p>
             <div class="bottom-row">
               <span class="url-text"><a target="_blank" ng-href="{{foodEvent.url| baseUrl}}" ng-click="$event.stopPropagation();">{{foodEvent.url | baseUrlName}}</a></span>
-              <span ng-repeat="item in foodEvent.foodProvided" class="badge"> {{item}} </span>
+              <span ng-repeat="item in foodEvent.foodProvided | limitTo : 4" class="badge"> {{item}} </span>
             </div>
           </td>
 
@@ -43,7 +43,7 @@
           </td>
           <td class="fourth-column clickable" ng-click="foodEvent.showDescription = !foodEvent.showDescription">
             <button type="button" class="btn btn-sm" ng-click="showRoute(foodEvent); $event.stopPropagation();"> 
-              <img class="route-btn" src="/assets/routeIcon.svg" />
+              <img class="route-img" src="/assets/routeIcon.svg" />
             </button>
           </td>
         </tr>
