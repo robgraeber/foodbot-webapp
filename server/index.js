@@ -5,14 +5,18 @@
 var express = require('express');
 var api = require('./routes/api');
 var path = require('path');
-var app = module.exports = express();
-
+var app = express();
+var cluster = require('cluster');
 /**
  * Configuration
  */
 app.set('port', process.env.PORT || 8000);
 app.use(express.compress());
 app.use(express.static(path.join(__dirname, '../public')));
+app.use(function(req, res, next) {
+  console.log("-- Worker ID:", cluster.worker.id, "--");
+  next();
+})
 /**
  * Routes
  */
