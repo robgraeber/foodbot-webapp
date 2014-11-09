@@ -5,7 +5,7 @@ API server + frontend + scraper.
 
 Dependencies: node, bower, npm, gulp, mongodb
 
-To run: npm/bower install, export keys, "gulp build", run server.js 
+To run: npm/bower install, ". keys.sh", "gulp build", run server.js 
 
 And set a daily cron job for the .scheduler.
 
