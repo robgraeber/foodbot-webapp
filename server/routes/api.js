@@ -16,8 +16,11 @@ var excludedPhrases = require('../shared/excludedPhrases');
 /************************************************************************
  * Database access
  ***********************************************************************/
-var pmongo = require('promised-mongo');
-var db = Promise.promisifyAll(pmongo(process.env.MONGOURL, ['meetup','eventbrite','funcheap','facebook','coordsTable']));
+var mongo = require('mongojs')
+var db = mongo(process.env.MONGOURL, ['meetup','eventbrite','coordsTable'], {authMechanism: 'ScramSHA1'});
+Promise.promisifyAll(db.meetup);
+Promise.promisifyAll(db.eventbrite);
+Promise.promisifyAll(db.coordsTable);
 
 /************************************************************************
  * Main Function
@@ -39,7 +42,7 @@ module.exports = function(req, res){
   // if the address is in the collection, we retrieve the latitude and longitude stored 
   // otherwise we send a request to the google maps api
   var checkCoords = function(address){
-    return db.coordsTable.findOne({_id: address.toLowerCase().trim()})
+    return db.coordsTable.findOneAsync({_id: address.toLowerCase().trim()})
       .then(function(result){
         if(result){
           console.log('Got coords from database');
@@ -89,28 +92,35 @@ module.exports = function(req, res){
       time: { $gt: time-5*60*60*1000 }
     };
     var explainQuery = { $query: query, $explain: 1 };
-    return Promise.all([
-      db.meetup.find(query)
-      .limit(1000)
-      .toArray(),
-      db.eventbrite.find(query)
-      .limit(1000)
-      .toArray() 
-    ]).then(function(results){
+    return new Promise(function(resolve, reject) {
+        var resolveCount = 0;
+        var results = [];
+        db.meetup.find(query)
+        .limit(1000)
+        .toArray(function(err, values) {
+          results = results.concat(values);
+          resolveCount++;
+          if (resolveCount === 2) {
+            resolve(results);
+          }
+        })
+
+        db.eventbrite.find(query)
+        .limit(1000)
+        .toArray(function(err, values) {
+          results = results.concat(values);
+          resolveCount++;
+          if (resolveCount === 2) {
+            resolve(results);
+          }
+        })
+    })
+    .then(function(results){
       console.log("Db query time:",new Date().getTime()-timer);
       return results;
     });
   })
   
-  /**********************************************************************
-   * Getting the next events from the different collections
-   **********************************************************************/
-  .spread(function(meetup, eventbrite) {
-    // concat the meetup, eventbrite and funcheap results
-    var allEvents = _.union(meetup, eventbrite);
-    return allEvents;
-  })
-
   /**********************************************************************
    * Taking out the finished events from the results
    **********************************************************************/
@@ -184,7 +194,7 @@ module.exports = function(req, res){
    * Return the filtered events
    ***********************************************************************/
   .then(function(results){
-    // console.log("Results returned:", results.length);
+    console.log("Results returned:", results.length);
     results = _.sortBy(results, function(o) { return o.time; });
     res.send({results:results, status:"OK"});
   })

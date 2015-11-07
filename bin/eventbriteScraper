@@ -4,16 +4,16 @@ var Promise = require('bluebird');
 var request = Promise.promisifyAll(require('request'));
 var cheerio = require('cheerio');
 var _ = require('underscore');
-
-var pmongo = require('promised-mongo');
-var db = pmongo(process.env.MONGOURL, ["eventbrite"]);
+var mongo = require('mongojs')
+var db = mongo(process.env.MONGOURL, ["eventbrite"], {authMechanism: 'ScramSHA1'});
+Promise.promisifyAll(db.eventbrite);
 
 var googleApiKey = process.env.GOOGLEAPIKEY || "123FAKEKEY";
 var eventUrls = [];
 var pageCount = 0;
 var insertCount = 0;
 var getSearchPageUrl = function(pageNum){
-  return "http://www.eventbrite.com/directory?loc=San+Francisco%2C+CA&is_miles=True&vp_ne_lat=37.812&price=1&vp_sw_lng=-122.527&page="+pageNum+"&slng=-122.42&vp_sw_lat=37.7034&radius=60.0&vp_ne_lng=-122.3482&slat=37.77";
+  return "https://www.eventbrite.com/d/ca--san-francisco/events/?crt=regular&page="+pageNum+"&radius=96.5606400369&slat=37.7749&slng=-122.4194&sort=best&view=list";
 };
 //need to manually terminate program when scraping complete, since db connection is always open
 var terminateProgram = function(){

@@ -3,8 +3,9 @@
 var Promise = require('bluebird');
 var request = Promise.promisifyAll(require('request'));
 var _ = require('underscore');
-var pmongo = require('promised-mongo');
-var db = pmongo(process.env.MONGOURL, ["meetup"]);
+var mongo = require('mongojs')
+var db = mongo(process.env.MONGOURL, ["meetup"], {authMechanism: 'ScramSHA1'});
+Promise.promisifyAll(db.meetup);
 
 var googleApiKey = process.env.GOOGLEAPIKEY || "123FAKEKEY";
 var meetupApiKey = process.env.MEETUPAPIKEY || "123FAKEKEY";
@@ -106,7 +107,7 @@ request.getAsync({url:"https://maps.googleapis.com/maps/api/geocode/json", qs:{k
 .then(function(results){
   console.log("Inserting "+results.length+" events into db..");
   var eventPromises = _.map(results, function(item){
-    return db.meetup.save(item)
+    return db.meetup.saveAsync(item)
     .then(function(){
       insertCount++;
       console.log("Inserted / updated entry #"+insertCount);
