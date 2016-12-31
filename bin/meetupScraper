@@ -3,7 +3,7 @@
 var Promise = require('bluebird');
 var request = Promise.promisifyAll(require('request'));
 var _ = require('underscore');
-var mongo = require('mongojs')
+var mongo = require('mongojs');
 var db = mongo(process.env.MONGOURL, ["meetup"], {authMechanism: 'ScramSHA1'});
 Promise.promisifyAll(db.meetup);
 

@@ -15,10 +15,11 @@ npm start (and put in env variables)
 And setup a daily cron job for the .scheduler.
 
 Env variables required:
+```
 MEETUPAPIKEY
 GOOGLEAPIKEY
-MONGOURL //mongodb://@@@@@@@:27017/@@@@@
-PORT //8000
+MONGOURL
+PORT
 ```
 
 During development: type 'gulp' to compile and watch files
